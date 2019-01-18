@@ -65,23 +65,50 @@ public class VirtualSmartFridgeTest {
     public void turn_on_with_door_opened_and_no_products_inside() {
         when(fridgeFactory.createDoor()).thenReturn(fridgeDoor);
         when(fridgeFactory.createInspector()).thenReturn(inspector);
-        when(fridgeState.isTurnedOn()).thenReturn(Boolean.FALSE, Boolean.TRUE);
-        when(fridgeDoor.isOpened()).thenReturn(Boolean.FALSE, Boolean.TRUE, Boolean.FALSE);
+        when(fridgeState.isTurnedOn()).thenReturn(Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE);
+        when(fridgeDoor.isOpened()).thenReturn(Boolean.FALSE, Boolean.TRUE);
+        when(fridgeState.isInspectionDone()).thenReturn(Boolean.FALSE);
         when(inspector.survey(isA(List.class))).thenReturn(snapshots);
 
         vsf.turnOn(fridgeFactory);
-        vsf.open();
+        vsf.open(); //simulates call within state
         vsf.close();
 
-        verify(fridgeState, new Times(2)).isTurnedOn();
+        verify(fridgeState, new Times(4)).isTurnedOn();
         verify(fridgeState).turnOn(isA(SmartFridge.class));
         verify(fridgeFactory).createDoor();
         verify(fridgeFactory).createInspector();
-        verify(fridgeDoor, new Times(3)).isOpened();
+        verify(fridgeDoor, new Times(2)).isOpened();
         verify(fridgeDoor).open();
         verify(fridgeDoor).close();
+        verify(fridgeState).isInspectionDone();
         verify(inspector).survey(isA(List.class));
 
         assertFalse(vsf.hasUnidentifiedProducts());
+        assertFalse(vsf.hasFood());
+    }
+
+    @Test
+    public void turned_on_with_door_closed_and_no_products_inside() {
+        when(fridgeFactory.createDoor()).thenReturn(fridgeDoor);
+        when(fridgeFactory.createInspector()).thenReturn(inspector);
+        when(fridgeState.isTurnedOn()).thenReturn(Boolean.FALSE, Boolean.TRUE, Boolean.TRUE);
+        when(fridgeDoor.isOpened()).thenReturn(Boolean.FALSE);
+        when(fridgeState.isInspectionDone()).thenReturn(Boolean.FALSE);
+        when(inspector.survey(isA(List.class))).thenReturn(snapshots);
+
+        vsf.turnOn(fridgeFactory);
+        vsf.close(); //simulates call within state
+
+        verify(fridgeState, new Times(3)).isTurnedOn();
+        verify(fridgeFactory).createDoor();
+        verify(fridgeFactory).createInspector();
+        verify(fridgeState).turnOn(isA(SmartFridge.class));
+        verify(fridgeDoor).isOpened();
+        verify(fridgeState).isInspectionDone();
+        verify(inspector).survey(isA(List.class));
+
+        assertFalse(vsf.hasUnidentifiedProducts());
+        assertFalse(vsf.hasFood());
     }
 }

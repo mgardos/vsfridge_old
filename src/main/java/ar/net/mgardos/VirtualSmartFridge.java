@@ -29,10 +29,12 @@ public class VirtualSmartFridge implements SmartFridge {
     private SmartFridgeInspector inspector;
     private SmartFridgeState state;
     private List<Product> unidentifiedProducts;
+    private List<Food> food;
 
     public VirtualSmartFridge(SmartFridgeState fs) {
         state = fs;
         unidentifiedProducts = new ArrayList<Product>(0);
+        food = new ArrayList<Food>(0);
     }
 
     @Override
@@ -53,11 +55,11 @@ public class VirtualSmartFridge implements SmartFridge {
 
     @Override
     public void close() {
-        if (door.isOpened()) {
+        if (state.isTurnedOn() && door.isOpened()) {
             door.close();
         }
 
-        if (!door.isOpened()) {
+        if (state.isTurnedOn() && !state.isInspectionDone()) {
             List<Snapshot> snapshots = inspector.survey(unidentifiedProducts);
             if (snapshots.isEmpty()) {
                 unidentifiedProducts.clear();
@@ -67,5 +69,9 @@ public class VirtualSmartFridge implements SmartFridge {
 
     public Boolean hasUnidentifiedProducts() {
         return !unidentifiedProducts.isEmpty();
+    }
+
+    public boolean hasFood() {
+        return !food.isEmpty();
     }
 }

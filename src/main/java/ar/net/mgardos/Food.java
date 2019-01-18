@@ -21,12 +21,6 @@
 
 package ar.net.mgardos;
 
-public interface SmartFridgeState {
-    boolean isTurnedOn();
+public class Food extends Product {
 
-    default boolean isInspectionDone() {
-        return Boolean.FALSE;
-    }
-
-    void turnOn(SmartFridge fridge);
 }
